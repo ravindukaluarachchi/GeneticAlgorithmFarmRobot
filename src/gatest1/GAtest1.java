@@ -70,23 +70,43 @@ class Goal {
 
 }
 
+class Block {
+
+    int x;
+    int y;
+
+    public Block(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+}
+
 public class GAtest1 extends Application {
 
     final double CROSSOVER_RATE = 0.5d;
-    final int CHROMOSOME_LENGTH = 50;
+    final int CHROMOSOME_LENGTH = 100;
     final int POPULATION_SIZE = 12;
     final int MUTATION_PERCENTAGE = 10;
-    final int NO_OF_ROUNDS = 30;
-    
+    final int NO_OF_ROUNDS = 50;
+
+    final int INIT_X = 100;
+    final int INIT_Y = 700;
+    final int SLEEP = 50;
+
     Image craftImage;
 
     GraphicsContext gc;
 
     Image appleImage;
     Image treeImage;
+    Image stoneImage;
+    Image factoryImage;
+    Image tileImage;
+
     double currentX = 200;
     double currentY = 400;
-    double movementDelta = 10;
+    double movementDelta = 20;
     Integer completion = 0;
     boolean end = false;
     int round = 0;
@@ -94,19 +114,25 @@ public class GAtest1 extends Application {
 
     List<Individual> inidividuals = new ArrayList<>();
 
-    final Goal goal = new Goal(300, 130);
+    final Goal goal = new Goal(330, 130);
 
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException {
         Canvas canvas = new Canvas(1024, 768);
 
         gc = canvas.getGraphicsContext2D();
-        File imageFile = new File("spaceship.png");
+        File imageFile = new File("robot3.png");
         File appleFile = new File("apple.png");
         File treeFile = new File("tree1.png");
+        File stoneFile = new File("Coal-rock.png");
+        File factoryFile = new File("center.png");
+        File tileFile = new File("tile1.png");
 
         appleImage = new Image(new FileInputStream(appleFile));
         treeImage = new Image(new FileInputStream(treeFile));
+        stoneImage = new Image(new FileInputStream(stoneFile));
+        factoryImage = new Image(new FileInputStream(factoryFile));
+        tileImage = new Image(new FileInputStream(tileFile));
 
         StackPane root = new StackPane();
         root.getChildren().add(canvas);
@@ -136,19 +162,23 @@ public class GAtest1 extends Application {
          });*/
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
-        //  primaryStage.show();
+        primaryStage.show();
 
         System.out.println();
         // draw();
         craftImage = new Image(new FileInputStream(imageFile));
         for (int i = 0; i < POPULATION_SIZE; i++) {
             //genes.add(;
-            inidividuals.add(new Individual(i * 10, 400, getRandomlyInitializedChromosome()));
+            inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
         }
         start();
     }
 
     private void start() {
+        for (int i = 0; i < this.inidividuals.size(); i++) {
+            inidividuals.get(i).x = INIT_X;
+            inidividuals.get(i).y = INIT_Y;
+        }
         completion = 0;
         round++;
         if (round == NO_OF_ROUNDS) {
@@ -208,7 +238,7 @@ public class GAtest1 extends Application {
                         break;
                 }
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(SLEEP);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -226,12 +256,27 @@ public class GAtest1 extends Application {
 
     private void draw(Individual individual1) {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-        // gc.
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++) {
+                gc.drawImage(tileImage, 256 * (j),  256 * i);
+            }
+        }
 
         for (int i = 0; i < 5; i++) {
-            gc.drawImage(treeImage, 100 * (i + 1), 100, 100, 100);
+            gc.drawImage(treeImage, 100 * (i + 1), 80, 100, 100);
         }
+
+        for (int i = 0; i < 10; i++) {
+            gc.drawImage(stoneImage, 50 + 50 * (i + 1), 300, 50, 50);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            gc.drawImage(stoneImage, 700, 50 + 50 * (i + 1), 50, 50);
+        }
+
         gc.drawImage(appleImage, goal.x, goal.y, 20, 20);
+        gc.drawImage(factoryImage, 800, 400, 160, 100);
         for (Individual inidividual : inidividuals) {
             gc.drawImage(craftImage, inidividual.x, inidividual.y, 50, 50);
         }
@@ -261,6 +306,7 @@ public class GAtest1 extends Application {
             System.out.println("parent 2 index " + parent2Index);
             while (parent1Index == parent2Index) {
                 parent2Index = random.nextInt(unSelectedParents.size());
+                System.out.println("@@parent 2 index " + parent2Index);
             }
 
             int parent3Index = random.nextInt(unSelectedParents.size());
@@ -268,7 +314,7 @@ public class GAtest1 extends Application {
             while (parent1Index == parent3Index
                     || parent2Index == parent3Index) {
                 parent3Index = random.nextInt(unSelectedParents.size());
-                System.out.println("@parent 3 index " + parent3Index);
+                System.out.println("@p@arent 3 index " + parent3Index);
             }
 
             int parent4Index = random.nextInt(unSelectedParents.size());
@@ -277,6 +323,7 @@ public class GAtest1 extends Application {
                     || parent2Index == parent4Index
                     || parent3Index == parent4Index) {
                 parent4Index = random.nextInt(unSelectedParents.size());
+                System.out.println("@@parent 4 index " + parent4Index);
             }
 
             Individual candidateParent1 = unSelectedParents.get(parent1Index);
@@ -319,24 +366,30 @@ public class GAtest1 extends Application {
             removeList.add(candidateParent4);
 
             unSelectedParents.removeAll(removeList);
+            System.out.println("1");
             //2point cross over
             int point1 = random.nextInt(CHROMOSOME_LENGTH - 1);
             int point2;
             do {
                 point2 = random.nextInt(CHROMOSOME_LENGTH);
-            } while (point2 >= point1);
-
+                System.out.println("2 >> " + point2 + " >= " + point1);
+            } while (point2 < point1);
+            System.out.println("3");
             //child1
             int[] newChromosome = new int[CHROMOSOME_LENGTH];
             for (int j = 0; j < point1; j++) {
                 newChromosome[j] = parent1.genes[j];
             }
+            System.out.println("4");
             for (int j = point1; j < point2; j++) {
                 newChromosome[j] = parent2.genes[j];
             }
+            System.out.println("5");
             for (int j = point2; j < newChromosome.length; j++) {
                 newChromosome[j] = parent1.genes[j];
             }
+            System.out.println("6");
+            System.out.println("7");
             Individual child1 = new Individual(0, 0, newChromosome);
             newIndividuals.add(child1);
             //child2
@@ -344,12 +397,15 @@ public class GAtest1 extends Application {
             for (int j = 0; j < point1; j++) {
                 newChromosome[j] = parent2.genes[j];
             }
+            System.out.println("8");
             for (int j = point1; j < point2; j++) {
                 newChromosome[j] = parent1.genes[j];
             }
+            System.out.println("9");
             for (int j = point2; j < newChromosome.length; j++) {
                 newChromosome[j] = parent2.genes[j];
             }
+            System.out.println("10");
             Individual child2 = new Individual(0, 0, newChromosome);
             newIndividuals.add(child2);
             System.out.println("cross over i : " + i + " end ---");
