@@ -10,6 +10,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -43,6 +46,16 @@ class Individual {
         this.genes = genes;
     }
 
+    @Override
+    public String toString() {
+        String s = "Individual{" + "x=" + x + ", y=" + y + ", fitness=" + fitness + ", genes=[";
+        for (int gene : genes) {
+            s += gene + " ";
+        }
+        s += "']}'";
+        return s;
+    }
+
 }
 
 class Goal {
@@ -59,6 +72,12 @@ class Goal {
 
 public class GAtest1 extends Application {
 
+    final double CROSSOVER_RATE = 0.5d;
+    final int CHROMOSOME_LENGTH = 50;
+    final int POPULATION_SIZE = 12;
+    final int MUTATION_PERCENTAGE = 10;
+    final int NO_OF_ROUNDS = 30;
+    
     Image craftImage;
 
     GraphicsContext gc;
@@ -70,6 +89,7 @@ public class GAtest1 extends Application {
     double movementDelta = 10;
     Integer completion = 0;
     boolean end = false;
+    int round = 0;
     List<int[]> genes = new ArrayList<int[]>();
 
     List<Individual> inidividuals = new ArrayList<>();
@@ -116,33 +136,44 @@ public class GAtest1 extends Application {
          });*/
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
-        primaryStage.show();
+        //  primaryStage.show();
 
         System.out.println();
         // draw();
         craftImage = new Image(new FileInputStream(imageFile));
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < POPULATION_SIZE; i++) {
             //genes.add(;
-            inidividuals.add(new Individual(i * 10, 400, getRandomlyInitializedGene()));
+            inidividuals.add(new Individual(i * 10, 400, getRandomlyInitializedChromosome()));
         }
+        start();
+    }
 
+    private void start() {
+        completion = 0;
+        round++;
+        if (round == NO_OF_ROUNDS) {
+            System.exit(0);
+        }
+        System.out.println(round + " ==========================");
+        for (Individual inidividual : inidividuals) {
+            System.out.println(inidividual);
+        }
         for (Individual i : inidividuals) {
             new Thread(() -> {
                 move(i);
             }).start();
         }
-
     }
 
-    private int[] getRandomlyInitializedGene() {
-        int[] gene = new int[50];
+    private int[] getRandomlyInitializedChromosome() {
+        int[] chromosome = new int[CHROMOSOME_LENGTH];
         Random random = new Random();
-        for (int i = 0; i < gene.length; i++) {
-            gene[i] = random.nextInt(4) + 1;
-            System.out.print(gene[i] + " ");
+        for (int i = 0; i < chromosome.length; i++) {
+            chromosome[i] = random.nextInt(4) + 1;
+            //  System.out.print(chromosome[i] + " ");
         }
-        System.out.println("");
-        return gene;
+        //System.out.println("");
+        return chromosome;
     }
 
     private void move(Individual individual) {
@@ -196,7 +227,7 @@ public class GAtest1 extends Application {
     private void draw(Individual individual1) {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
         // gc.
-        
+
         for (int i = 0; i < 5; i++) {
             gc.drawImage(treeImage, 100 * (i + 1), 100, 100, 100);
         }
@@ -212,11 +243,147 @@ public class GAtest1 extends Application {
             inidividual.fitness = Math.sqrt(Math.pow(goal.x - inidividual.x, 2) + Math.pow(goal.y - inidividual.y, 2));
             System.out.println(inidividual.fitness);
         }
+        crossOver();
     }
 
-    /**
-     * @param args the command line arguments
-     */
+    private void crossOver() {
+        List<Individual> unSelectedParents = new ArrayList<>();
+        List<Individual> newIndividuals = new ArrayList<>();
+        unSelectedParents.addAll(inidividuals);
+        int crossOverAmount = new Double(inidividuals.size() * CROSSOVER_RATE).intValue() / 2;
+        Random random = new Random();
+        for (int i = 0; i < crossOverAmount; i++) {
+            System.out.println("un selected parents size : " + unSelectedParents.size());
+            System.out.println("cross over i : " + i + " start ---");
+            int parent1Index = random.nextInt(unSelectedParents.size());
+            System.out.println("parent 1 index " + parent1Index);
+            int parent2Index = random.nextInt(unSelectedParents.size());
+            System.out.println("parent 2 index " + parent2Index);
+            while (parent1Index == parent2Index) {
+                parent2Index = random.nextInt(unSelectedParents.size());
+            }
+
+            int parent3Index = random.nextInt(unSelectedParents.size());
+            System.out.println("parent 3 index " + parent3Index);
+            while (parent1Index == parent3Index
+                    || parent2Index == parent3Index) {
+                parent3Index = random.nextInt(unSelectedParents.size());
+                System.out.println("@parent 3 index " + parent3Index);
+            }
+
+            int parent4Index = random.nextInt(unSelectedParents.size());
+            System.out.println("parent 4 index " + parent4Index);
+            while (parent1Index == parent4Index
+                    || parent2Index == parent4Index
+                    || parent3Index == parent4Index) {
+                parent4Index = random.nextInt(unSelectedParents.size());
+            }
+
+            Individual candidateParent1 = unSelectedParents.get(parent1Index);
+            Individual candidateParent2 = unSelectedParents.get(parent2Index);
+            Individual candidateParent3 = unSelectedParents.get(parent3Index);
+            Individual candidateParent4 = unSelectedParents.get(parent4Index);
+
+            List<Individual> candidateList = new ArrayList<>();
+            candidateList.add(candidateParent1);
+            candidateList.add(candidateParent2);
+            candidateList.add(candidateParent3);
+            candidateList.add(candidateParent4);
+
+            Individual parent1 = null;
+            Individual parent2 = null;
+            for (Individual individual : candidateList) {
+                if (parent1 == null) {
+                    parent1 = individual;
+                } else if (parent1.fitness > individual.fitness) {
+                    parent1 = individual;
+                }
+            }
+            candidateList.remove(parent1);
+
+            for (Individual individual : candidateList) {
+                if (parent2 == null) {
+                    parent2 = individual;
+                } else if (parent2.fitness > individual.fitness) {
+                    parent2 = individual;
+                }
+            }
+
+            System.out.println("parent1 >> " + parent1);
+            System.out.println("parent2 >> " + parent2);
+
+            List<Individual> removeList = new ArrayList<>();
+            removeList.add(candidateParent1);
+            removeList.add(candidateParent2);
+            removeList.add(candidateParent3);
+            removeList.add(candidateParent4);
+
+            unSelectedParents.removeAll(removeList);
+            //2point cross over
+            int point1 = random.nextInt(CHROMOSOME_LENGTH - 1);
+            int point2;
+            do {
+                point2 = random.nextInt(CHROMOSOME_LENGTH);
+            } while (point2 >= point1);
+
+            //child1
+            int[] newChromosome = new int[CHROMOSOME_LENGTH];
+            for (int j = 0; j < point1; j++) {
+                newChromosome[j] = parent1.genes[j];
+            }
+            for (int j = point1; j < point2; j++) {
+                newChromosome[j] = parent2.genes[j];
+            }
+            for (int j = point2; j < newChromosome.length; j++) {
+                newChromosome[j] = parent1.genes[j];
+            }
+            Individual child1 = new Individual(0, 0, newChromosome);
+            newIndividuals.add(child1);
+            //child2
+            newChromosome = new int[CHROMOSOME_LENGTH];
+            for (int j = 0; j < point1; j++) {
+                newChromosome[j] = parent2.genes[j];
+            }
+            for (int j = point1; j < point2; j++) {
+                newChromosome[j] = parent1.genes[j];
+            }
+            for (int j = point2; j < newChromosome.length; j++) {
+                newChromosome[j] = parent2.genes[j];
+            }
+            Individual child2 = new Individual(0, 0, newChromosome);
+            newIndividuals.add(child2);
+            System.out.println("cross over i : " + i + " end ---");
+        }
+        System.out.println("new individual size " + newIndividuals.size());
+        for (Individual newIndividual : newIndividuals) {
+            System.out.println(newIndividual);
+        }
+        List<Individual> newPopulation = new ArrayList<>();
+        newPopulation.addAll(newIndividuals);
+        int remainingPopulationSize = POPULATION_SIZE - newIndividuals.size();
+        Collections.shuffle(inidividuals);
+        for (int i = 0; i < remainingPopulationSize; i++) {
+            inidividuals.get(i).x = 0;
+            inidividuals.get(i).y = 0;
+            inidividuals.get(i).fitness = 0;
+            newPopulation.add(inidividuals.get(i));
+        }
+        inidividuals = newPopulation;
+        mutate();
+    }
+
+    private void mutate() {
+        int mutationCount = CHROMOSOME_LENGTH * MUTATION_PERCENTAGE / 100;
+        Random random = new Random();
+        for (Individual inidividual : inidividuals) {
+            for (int i = 0; i < mutationCount; i++) {
+                int index = random.nextInt(CHROMOSOME_LENGTH);
+                inidividual.genes[index] = random.nextInt(4) + 1;
+            }
+        }
+        start();
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
