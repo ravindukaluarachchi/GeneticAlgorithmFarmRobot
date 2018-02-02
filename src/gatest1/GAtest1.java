@@ -286,6 +286,7 @@ public class GAtest1 extends Application {
     private void calculateFitness() {
         for (Individual inidividual : inidividuals) {
             inidividual.fitness = Math.sqrt(Math.pow(goal.x - inidividual.x, 2) + Math.pow(goal.y - inidividual.y, 2));
+            inidividual.fitness = 1/inidividual.fitness ;
             System.out.println(inidividual.fitness);
         }
         crossOver();
@@ -342,7 +343,7 @@ public class GAtest1 extends Application {
             for (Individual individual : candidateList) {
                 if (parent1 == null) {
                     parent1 = individual;
-                } else if (parent1.fitness > individual.fitness) {
+                } else if (parent1.fitness < individual.fitness) {
                     parent1 = individual;
                 }
             }
@@ -351,7 +352,7 @@ public class GAtest1 extends Application {
             for (Individual individual : candidateList) {
                 if (parent2 == null) {
                     parent2 = individual;
-                } else if (parent2.fitness > individual.fitness) {
+                } else if (parent2.fitness < individual.fitness) {
                     parent2 = individual;
                 }
             }
