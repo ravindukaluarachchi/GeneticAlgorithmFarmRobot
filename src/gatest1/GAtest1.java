@@ -5,10 +5,12 @@
  */
 package gatest1;
 
+import com.sun.javafx.css.FontFace;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,72 +29,26 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 /**
  *
  * @author ravindu
  */
-class Individual {
-
-    int x;
-    int y;
-    int[] genes;
-    double fitness;
-
-    public Individual(int x, int y, int[] genes) {
-        this.x = x;
-        this.y = y;
-        this.genes = genes;
-    }
-
-    @Override
-    public String toString() {
-        String s = "Individual{" + "x=" + x + ", y=" + y + ", fitness=" + fitness + ", genes=[";
-        for (int gene : genes) {
-            s += gene + " ";
-        }
-        s += "']}'";
-        return s;
-    }
-
-}
-
-class Goal {
-
-    int x;
-    int y;
-
-    public Goal(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-}
-
-class Block {
-
-    int x;
-    int y;
-
-    public Block(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-}
-
 public class GAtest1 extends Application {
 
     final double CROSSOVER_RATE = 0.5d;
-    final int CHROMOSOME_LENGTH = 100;
+    final int CHROMOSOME_LENGTH = 400;
     final int POPULATION_SIZE = 12;
     final int MUTATION_PERCENTAGE = 10;
     final int NO_OF_ROUNDS = 50;
 
     final int INIT_X = 100;
     final int INIT_Y = 700;
-    final int SLEEP = 50;
+    final int SLEEP = 20;
 
     Image craftImage;
 
@@ -113,8 +69,11 @@ public class GAtest1 extends Application {
     List<int[]> genes = new ArrayList<int[]>();
 
     List<Individual> inidividuals = new ArrayList<>();
-
+    Individual solution;
     final Goal goal = new Goal(330, 130);
+    final Goal endGoal = new Goal(800, 400);
+
+    List<Thread> movementThreads = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage) throws FileNotFoundException {
@@ -139,27 +98,6 @@ public class GAtest1 extends Application {
 
         Scene scene = new Scene(root);
 
-        /*    scene.setOnKeyPressed(e -> {
-         switch (e.getCode()) {
-         case UP:
-         currentY -= movementDelta;
-         draw();
-         break;
-         case DOWN:
-         currentY += movementDelta;
-         draw();
-         break;
-         case LEFT:
-         currentX -= movementDelta;
-         draw();
-         break;
-         case RIGHT:
-         currentX += movementDelta;
-         draw();
-         break;
-         }
-
-         });*/
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -199,7 +137,7 @@ public class GAtest1 extends Application {
         int[] chromosome = new int[CHROMOSOME_LENGTH];
         Random random = new Random();
         for (int i = 0; i < chromosome.length; i++) {
-            chromosome[i] = random.nextInt(4) + 1;
+            chromosome[i] = random.nextInt(6) + 1;
             //  System.out.print(chromosome[i] + " ");
         }
         //System.out.println("");
@@ -208,44 +146,58 @@ public class GAtest1 extends Application {
 
     private void move(Individual individual) {
         int[] gene = individual.genes;
+        if (solution != null) {
+            System.out.println(solution);
+            return;
+        }
         Thread t = new Thread(() -> {
             for (int i : gene) {
                 switch (i) {
                     case 1:
                         individual.y -= movementDelta;
-                        Platform.runLater(() -> {
-                            draw(individual);
-                        });
-
                         break;
                     case 2:
                         individual.y += movementDelta;
-                        Platform.runLater(() -> {
-                            draw(individual);
-                        });
                         break;
                     case 3:
                         individual.x -= movementDelta;
-                        Platform.runLater(() -> {
-                            draw(individual);
-                        });
                         break;
                     case 4:
                         individual.x += movementDelta;
-                        Platform.runLater(() -> {
-                            draw(individual);
-                        });
+                        break;
+                    case 5:
+                        if (individual.pick(new Goal[]{goal})) {
+                            System.out.println("************************************found goal*******************");
+                            //  System.exit(0);
+                        }
+                        break;
+                    case 6:
+                        if (individual.drop(endGoal)) {
+                            System.out.println("************************************drop complete*******************");
+                            //System.exit(0);
+                            if (solution == null) {                                
+                                solution = individual;
+                                move(individual);
+                            }else{
+                                return;
+                            }
+
+                        }
                         break;
                 }
+                Platform.runLater(() -> {
+                    draw(individual);
+                });
                 try {
                     Thread.sleep(SLEEP);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
             synchronized (goal) {
                 completion++;
-                System.out.println("completion" + completion);
+                //  System.out.println("completion" + completion);
                 if (completion / inidividuals.size() == 1) {
                     calculateFitness();
                 }
@@ -254,12 +206,12 @@ public class GAtest1 extends Application {
         t.start();
     }
 
-    private void draw(Individual individual1) {
+    private void draw(Individual ind) {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
-                gc.drawImage(tileImage, 256 * (j),  256 * i);
+                gc.drawImage(tileImage, 256 * (j), 256 * i);
             }
         }
 
@@ -276,17 +228,46 @@ public class GAtest1 extends Application {
         }
 
         gc.drawImage(appleImage, goal.x, goal.y, 20, 20);
-        gc.drawImage(factoryImage, 800, 400, 160, 100);
-        for (Individual inidividual : inidividuals) {
-            gc.drawImage(craftImage, inidividual.x, inidividual.y, 50, 50);
-        }
+        gc.drawImage(factoryImage, endGoal.x, endGoal.y, 160, 100);
+        if (solution == null) {
 
+            for (Individual inidividual : inidividuals) {
+                gc.drawImage(craftImage, inidividual.x, inidividual.y, 50, 50);
+            }
+
+            //draw status
+            double consoleX = gc.getCanvas().getWidth() - 250;
+            double consoleY = 0;
+            double consoleXText = consoleX + 10;
+            double consoleYText = consoleY + 50;
+
+            gc.setFill(Color.BLACK);
+            gc.fillRect(consoleX, consoleY, 250, 300);
+            gc.setStroke(Color.GREEN);
+            gc.strokeText("[Console] round : " + round, consoleXText, consoleYText);
+            for (int i = 0; i < inidividuals.size(); i++) {
+                //  System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" );
+                //System.out.println( inidividuals.get(i).fitness);
+                String s = String.format("%d | %.8f  %d", i + 1, inidividuals.get(i).fitness, inidividuals.get(i).payload.size());
+                // gc.strokeText((i + 1) + " | " + new DecimalFormat("#.0000").format(inidividuals.get(i).fitness) + "  " + inidividuals.get(i).payload.size(), consoleXText, consoleYText + (20 * (i + 1)));
+                gc.strokeText(s, consoleXText, consoleYText + (20 * (i + 1)));
+            }
+
+        } else {
+            gc.drawImage(craftImage, ind.x, ind.y, 50, 50);
+        }
     }
 
     private void calculateFitness() {
         for (Individual inidividual : inidividuals) {
-            inidividual.fitness = Math.sqrt(Math.pow(goal.x - inidividual.x, 2) + Math.pow(goal.y - inidividual.y, 2));
-            inidividual.fitness = 1/inidividual.fitness ;
+            if (inidividual.payload.size() == 0) {
+                inidividual.fitness = Math.sqrt(Math.pow(goal.x - inidividual.x, 2) + Math.pow(goal.y - inidividual.y, 2));
+                inidividual.fitness = 1 / inidividual.fitness;
+            } else {
+                inidividual.fitness = Math.sqrt(Math.pow(endGoal.x - inidividual.x, 2) + Math.pow(endGoal.y - inidividual.y, 2));
+                inidividual.fitness = 1 / inidividual.fitness;
+                inidividual.fitness += inidividual.payload.size();
+            }
             System.out.println(inidividual.fitness);
         }
         crossOver();
@@ -422,7 +403,7 @@ public class GAtest1 extends Application {
         for (int i = 0; i < remainingPopulationSize; i++) {
             inidividuals.get(i).x = 0;
             inidividuals.get(i).y = 0;
-            inidividuals.get(i).fitness = 0;
+            //inidividuals.get(i).fitness = 0;
             newPopulation.add(inidividuals.get(i));
         }
         inidividuals = newPopulation;
@@ -435,12 +416,15 @@ public class GAtest1 extends Application {
         for (Individual inidividual : inidividuals) {
             for (int i = 0; i < mutationCount; i++) {
                 int index = random.nextInt(CHROMOSOME_LENGTH);
-                inidividual.genes[index] = random.nextInt(4) + 1;
+                inidividual.genes[index] = random.nextInt(6) + 1;
             }
         }
         start();
     }
 
+    private void runSolution(){
+    }
+    
     public static void main(String[] args) {
         launch(args);
     }
