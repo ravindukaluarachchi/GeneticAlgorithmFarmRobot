@@ -38,17 +38,17 @@ import javafx.stage.Stage;
  *
  * @author ravindu
  */
-public class GAtest1 extends Application {
+public class GAtest2 extends Application {
 
     final double CROSSOVER_RATE = 0.5d;
     final int CHROMOSOME_LENGTH = 500;
     final int POPULATION_SIZE = 12;
     final int MUTATION_PERCENTAGE = 10;
-    final int NO_OF_ROUNDS = 500;
+    final int NO_OF_ROUNDS = 50;
 
     final int INIT_X = 100;
     final int INIT_Y = 700;
-    final int SLEEP = 10;
+    final int SLEEP = 20;
 
     Image craftImage;
 
@@ -105,10 +105,20 @@ public class GAtest1 extends Application {
         System.out.println();
         // draw();
         craftImage = new Image(new FileInputStream(imageFile));
-        for (int i = 0; i < POPULATION_SIZE; i++) {
+        /*for (int i = 0; i < POPULATION_SIZE; i++) {
             //genes.add(;
             inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
+        }*/
+        String s = "4 1 1 2 1 6 4 2 5 6 5 1 4 6 2 6 1 6 3 4 3 4 6 6 1 5 1 3 1 4 2 5 3 6 5 1 4 5 4 3 2 2 5 4 1 2 2 1 1 6 6 2 2 6 4 6 4 6 2 1 6 1 1 1 5 2 5 4 1 1 1 6 3 6 1 5 5 3 3 2 3 3 6 3 2 1 3 1 5 1 5 4 1 5 1 5 4 6 2 1 2 1 3 1 6 5 5 4 2 3 3 6 2 1 1 6 5 6 6 6 6 3 4 6 5 3 4 1 2 6 6 4 6 4 5 6 1 6 3 1 6 1 5 6 1 3 1 5 6 4 1 2 1 1 6 1 4 6 3 4 6 1 5 1 6 1 5 6 1 3 5 5 1 1 3 2 2 4 6 3 5 6 5 6 6 1 4 4 6 2 4 3 2 6 1 3 3 1 6 5 6 6 1 4 2 2 5 5 6 1 3 4 1 1 5 6 6 4 1 3 5 6 2 1 5 4 1 3 1 6 4 4 3 5 6 1 5 4 1 4 2 6 4 5 4 4 1 1 4 1 4 2 3 6 1 6 2 2 3 4 1 2 5 3 4 2 4 3 2 2 1 6 5 2 4 1 3 4 2 3 5 2 1 2 2 4 4 2 2 5 1 1 4 2 6 5 6 5 4 5 5 2 4 5 5 1 3 2 6 4 6 3 4 3 2 3 6 3 6 3 2 6 4 5 4 2 6 1 2 2 6 3 4 5 4 2 1 4 2 4 1 1 5 4 4 4 4 4 4 6 2 5 2 1 1 6 5 4 4 5 2 1 4 5 5 2 2 3 2 3 1 1 5 4 6 6 3 2 1 1 6 5 2 6 4 6 4 2 1 2 1 4 1 6 2 5 3 1 4 3 6 4 1 3 3 2 4 1 5 2 1 3 1 5 5 2 2 4 4 4 5 2 1 3 2 2 2 3 4 1 6 5 1 4 6 6 4 5 6 2 2 4 2 5 4 3 2 1 6 4 2 4 5 5 2 1 4 3 2 4 3 5 6 3 4 1 2 4 3 6 2 1 6 1 3 6 6 6 5 6 2 4 4 6 4 5 4 4 5 3 6 2 5 1 5 3 4 1 6 4";
+        String[] ss =s.split(" ");
+        int[] genes = new int[CHROMOSOME_LENGTH];
+        for (int i = 0; i < ss.length; i++) {
+            genes[i] = new Integer(ss[i]);
         }
+        Individual i = new Individual( 0, INIT_Y, genes);
+        inidividuals.add(i);
+        solution = i;
+        
         start();
     }
 
@@ -116,7 +126,6 @@ public class GAtest1 extends Application {
         for (int i = 0; i < this.inidividuals.size(); i++) {
             inidividuals.get(i).x = INIT_X;
             inidividuals.get(i).y = INIT_Y;
-            inidividuals.get(i).payload.clear();
         }
         completion = 0;
         round++;
@@ -173,14 +182,11 @@ public class GAtest1 extends Application {
                         }
                         break;
                     case 6:
-                        if (individual.payload.size() > 0 && individual.drop(endGoal)) {
+                        if (individual.drop(endGoal)) {
                             System.out.println("************************************drop complete*******************");
                             //System.exit(0);
                             if (solution == null) {                                
                                 solution = individual;
-                                System.out.println("Best individual ::: " );
-                                System.out.println(solution);
-                                System.out.println("::::::::::::::::::::::;;");
                                 individual.x = INIT_X;
                                 individual.y = INIT_Y;
                                 move(individual);
@@ -197,7 +203,7 @@ public class GAtest1 extends Application {
                 try {
                     Thread.sleep(SLEEP);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(GAtest2.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -276,7 +282,7 @@ public class GAtest1 extends Application {
             }
             System.out.println(inidividual.fitness);
         }
-        crossOver();
+       // crossOver();
     }
 
     private void crossOver() {
