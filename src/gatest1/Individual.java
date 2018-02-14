@@ -17,6 +17,8 @@ public class Individual {
     private static final double PICK_RADIUS = 100;
     int x;
     int y;
+    int w = 50;
+    int h = 50;
     int[] genes;
     double fitness;
     List<Goal> payload = new ArrayList<>();

@@ -13,6 +13,8 @@ public class Block {
 
     int x;
     int y;
+    int w = 50;
+    int h = 50;
 
     public Block(int x, int y) {
         this.x = x;

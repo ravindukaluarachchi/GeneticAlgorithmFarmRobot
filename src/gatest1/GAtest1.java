@@ -69,9 +69,10 @@ public class GAtest1 extends Application {
     List<int[]> genes = new ArrayList<int[]>();
 
     List<Individual> inidividuals = new ArrayList<>();
+    List<Block> blocks = new ArrayList<>();
     Individual solution;
     final Goal goal = new Goal(330, 130);
-    final Goal endGoal = new Goal(800, 400);
+    final Goal endGoal = new Goal(800, 550);
 
     List<Thread> movementThreads = new ArrayList<>();
 
@@ -92,6 +93,37 @@ public class GAtest1 extends Application {
         stoneImage = new Image(new FileInputStream(stoneFile));
         factoryImage = new Image(new FileInputStream(factoryFile));
         tileImage = new Image(new FileInputStream(tileFile));
+
+        for (int i = 0; i < 10; i++) {
+            if (i > 3 && i < 6) {
+                continue;
+            }
+            blocks.add(new Block(50 + 50 * (i + 1), 250));
+
+        }
+        for (int i = 0; i < 10; i++) {
+            if (i < 2 || i > 6) {
+                continue;
+            }
+            blocks.add(new Block(50 + 50 * (i + 1), 400));
+
+        }
+
+        for (int i = 0; i < 14; i++) {
+            if (i > 3 && i < 6) {
+                continue;
+            }
+            blocks.add(new Block(300 + 50 * (i + 1), 400));
+
+        }
+        
+        for (int i = 0; i < 7; i++) {
+             if (i > 1 && i < 4) {
+                continue;
+            }
+            blocks.add(new Block(700, 400 + 50 * (i + 1)));
+
+        }
 
         StackPane root = new StackPane();
         root.getChildren().add(canvas);
@@ -153,18 +185,36 @@ public class GAtest1 extends Application {
         }
         Thread t = new Thread(() -> {
             for (int i : gene) {
+                int originalX = individual.x;
+                int originalY = individual.y;
                 switch (i) {
                     case 1:
                         individual.y -= movementDelta;
+                        if (!validateMove(individual)) {
+                            individual.x = originalX;
+                            individual.y = originalY;
+                        }
                         break;
                     case 2:
                         individual.y += movementDelta;
+                        if (!validateMove(individual)) {
+                            individual.x = originalX;
+                            individual.y = originalY;
+                        }
                         break;
                     case 3:
                         individual.x -= movementDelta;
+                        if (!validateMove(individual)) {
+                            individual.x = originalX;
+                            individual.y = originalY;
+                        }
                         break;
                     case 4:
                         individual.x += movementDelta;
+                        if (!validateMove(individual)) {
+                            individual.x = originalX;
+                            individual.y = originalY;
+                        }
                         break;
                     case 5:
                         if (individual.pick(new Goal[]{goal})) {
@@ -176,15 +226,15 @@ public class GAtest1 extends Application {
                         if (individual.payload.size() > 0 && individual.drop(endGoal)) {
                             System.out.println("************************************drop complete*******************");
                             //System.exit(0);
-                            if (solution == null) {                                
+                            if (solution == null) {
                                 solution = individual;
-                                System.out.println("Best individual ::: " );
+                                System.out.println("Best individual ::: ");
                                 System.out.println(solution);
                                 System.out.println("::::::::::::::::::::::;;");
                                 individual.x = INIT_X;
                                 individual.y = INIT_Y;
                                 move(individual);
-                            }else{
+                            } else {
                                 return;
                             }
 
@@ -225,12 +275,15 @@ public class GAtest1 extends Application {
             gc.drawImage(treeImage, 100 * (i + 1), 80, 100, 100);
         }
 
-        for (int i = 0; i < 10; i++) {
-            gc.drawImage(stoneImage, 50 + 50 * (i + 1), 300, 50, 50);
-        }
+        /*for (int i = 0; i < 10; i++) {
+         gc.drawImage(stoneImage, 50 + 50 * (i + 1), 300, 50, 50);
+         }
 
-        for (int i = 0; i < 10; i++) {
-            gc.drawImage(stoneImage, 700, 50 + 50 * (i + 1), 50, 50);
+         for (int i = 0; i < 10; i++) {
+         gc.drawImage(stoneImage, 700, 50 + 50 * (i + 1), 50, 50);
+         }*/
+        for (Block block : blocks) {
+            gc.drawImage(stoneImage, block.x, block.y, block.w, block.h);
         }
 
         gc.drawImage(appleImage, goal.x, goal.y, 20, 20);
@@ -238,7 +291,7 @@ public class GAtest1 extends Application {
         if (solution == null) {
 
             for (Individual inidividual : inidividuals) {
-                gc.drawImage(craftImage, inidividual.x, inidividual.y, 50, 50);
+                gc.drawImage(craftImage, inidividual.x, inidividual.y,inidividual.w, inidividual.h);
             }
 
             //draw status
@@ -404,6 +457,19 @@ public class GAtest1 extends Application {
         }
         List<Individual> newPopulation = new ArrayList<>();
         newPopulation.addAll(newIndividuals);
+
+        Individual mostFitted = null;
+        for (Individual inidividual : inidividuals) {
+            if (mostFitted == null) {
+                mostFitted = inidividual;
+            }
+            if (mostFitted.fitness < inidividual.fitness) {
+                mostFitted = inidividual;
+            }
+        }
+        newPopulation.add(mostFitted);
+        inidividuals.remove(mostFitted);
+
         int remainingPopulationSize = POPULATION_SIZE - newIndividuals.size();
         Collections.shuffle(inidividuals);
         for (int i = 0; i < remainingPopulationSize; i++) {
@@ -413,26 +479,40 @@ public class GAtest1 extends Application {
             newPopulation.add(inidividuals.get(i));
         }
         inidividuals = newPopulation;
-        mutate();
+        mutate(mostFitted);
     }
 
-    private void mutate() {
+    private void mutate(Individual mostFitted) {
         int mutationCount = CHROMOSOME_LENGTH * MUTATION_PERCENTAGE / 100;
         Random random = new Random();
-        for (Individual inidividual : inidividuals) {
+        Collections.shuffle(inidividuals);
+        for (int j = 0; j < inidividuals.size() / 2; j++) {
+            Individual individual = inidividuals.get(j);
+            if (individual == mostFitted) {
+                continue;
+            }
             for (int i = 0; i < mutationCount; i++) {
                 int index = random.nextInt(CHROMOSOME_LENGTH);
-                inidividual.genes[index] = random.nextInt(6) + 1;
+                individual.genes[index] = random.nextInt(6) + 1;
             }
         }
         start();
     }
 
-    private void runSolution(){
+    private void runSolution() {
     }
-    
+
     public static void main(String[] args) {
         launch(args);
     }
 
+    private boolean validateMove(Individual individual) {
+        for (Block block : blocks) {
+            if ((individual.x >= block.x && individual.x <= block.x + block.w && individual.y >= block.y && individual.y <= block.y + block.h)
+                    || (individual.x  + individual.w>= block.x && individual.x + individual.w <= block.x + block.w && individual.y + individual.h>= block.y && individual.y + individual.h <= block.y + block.h)){
+                return false;
+            }
+        }
+        return true;
+    }
 }
