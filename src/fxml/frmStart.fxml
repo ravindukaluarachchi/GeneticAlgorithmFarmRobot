@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="312.0" prefWidth="334.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.FrmStartController">
+   <children>
+      <Button fx:id="btnStart" layoutX="229.0" layoutY="244.0" mnemonicParsing="false" onAction="#btnStartOnClick" prefHeight="25.0" prefWidth="78.0" text="Start" />
+      <CheckBox fx:id="chkElitist" layoutX="159.0" layoutY="124.0" mnemonicParsing="false" />
+      <ComboBox fx:id="cmbCrossOver" layoutX="158.0" layoutY="57.0" prefWidth="150.0" />
+      <TextField fx:id="txtPopulationSize" layoutX="158.0" layoutY="24.0" />
+      <Label layoutX="26.0" layoutY="28.0" text="Population Size:" />
+      <Label layoutX="25.0" layoutY="61.0" text="Cross Over Method:" />
+      <Label layoutX="24.0" layoutY="94.0" text="Mutation Percentage:" />
+      <Label layoutX="24.0" layoutY="158.0" text="No Of Rounds:" />
+      <Label layoutX="24.0" layoutY="192.0" text="Speed:" />
+      <TextField fx:id="txtNoOfRounds" layoutX="158.0" layoutY="154.0" />
+      <TextField fx:id="txtSpeed" layoutX="158.0" layoutY="188.0" />
+      <TextField fx:id="txtMutationPercentage" layoutX="158.0" layoutY="89.0" />
+      <Label layoutX="25.0" layoutY="123.0" text="Preserve Elitist:" />
+   </children>
+</AnchorPane>

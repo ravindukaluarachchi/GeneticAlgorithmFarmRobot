@@ -9,6 +9,7 @@ import com.sun.javafx.css.FontFace;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -77,8 +80,23 @@ public class GAtest1 extends Application {
     List<Thread> movementThreads = new ArrayList<>();
 
     @Override
-    public void start(Stage primaryStage) throws FileNotFoundException {
-        Canvas canvas = new Canvas(1024, 768);
+    public void start(Stage primaryStage) throws FileNotFoundException,IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/frmStart.fxml"));
+
+        Scene scene = new Scene(root);
+      //  scene.getStylesheets().add("/styles/Styles.css");
+
+        primaryStage.setTitle("Enter Init Parameters");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        
+        Button btnStart = (Button)scene.lookup("btnStart");
+        System.out.println(btnStart);
+        System.out.println(scene.lookup("ap"));
+       // btnStart.setOnAction((e) -> {
+       //     System.out.println("hello");
+       // });
+        /*Canvas canvas = new Canvas(1024, 768);
 
         gc = canvas.getGraphicsContext2D();
         File imageFile = new File("robot3.png");
@@ -141,7 +159,7 @@ public class GAtest1 extends Application {
             //genes.add(;
             inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
         }
-        start();
+        start();*/
     }
 
     private void start() {
@@ -291,7 +309,7 @@ public class GAtest1 extends Application {
         if (solution == null) {
 
             for (Individual inidividual : inidividuals) {
-                gc.drawImage(craftImage, inidividual.x, inidividual.y,inidividual.w, inidividual.h);
+                gc.drawImage(craftImage, inidividual.x, inidividual.y, inidividual.w, inidividual.h);
             }
 
             //draw status
@@ -509,7 +527,7 @@ public class GAtest1 extends Application {
     private boolean validateMove(Individual individual) {
         for (Block block : blocks) {
             if ((individual.x >= block.x && individual.x <= block.x + block.w && individual.y >= block.y && individual.y <= block.y + block.h)
-                    || (individual.x  + individual.w>= block.x && individual.x + individual.w <= block.x + block.w && individual.y + individual.h>= block.y && individual.y + individual.h <= block.y + block.h)){
+                    || (individual.x + individual.w >= block.x && individual.x + individual.w <= block.x + block.w && individual.y + individual.h >= block.y && individual.y + individual.h <= block.y + block.h)) {
                 return false;
             }
         }
