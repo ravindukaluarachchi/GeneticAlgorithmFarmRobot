@@ -24,17 +24,23 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 /**
@@ -43,15 +49,15 @@ import javafx.stage.Stage;
  */
 public class GAtest1 extends Application {
 
-    final double CROSSOVER_RATE = 0.5d;
-    final int CHROMOSOME_LENGTH = 500;
-    final int POPULATION_SIZE = 12;
-    final int MUTATION_PERCENTAGE = 10;
-    final int NO_OF_ROUNDS = 500;
+    double CROSSOVER_RATE = 0.5d;
+    int CHROMOSOME_LENGTH = 500;
+    int POPULATION_SIZE = 12;
+    int MUTATION_PERCENTAGE = 10;
+    int NO_OF_ROUNDS = 500;
 
     final int INIT_X = 100;
     final int INIT_Y = 700;
-    final int SLEEP = 10;
+    int SLEEP = 10;
 
     Image craftImage;
 
@@ -80,22 +86,48 @@ public class GAtest1 extends Application {
     List<Thread> movementThreads = new ArrayList<>();
 
     @Override
-    public void start(Stage primaryStage) throws FileNotFoundException,IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/frmStart.fxml"));
+    public void start(Stage primaryStage) throws Exception {
+        Screen screen3 = Screen.getScreens().get(1);
+        Rectangle2D bounds = screen3.getBounds();
 
-        Scene scene = new Scene(root);
-      //  scene.getStylesheets().add("/styles/Styles.css");
+        primaryStage.setX(bounds.getMinX() + 100);
+        primaryStage.setY(bounds.getMinY() + 100);
 
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/frmStart.fxml"));
+        Parent rootConfig = loader.load();
+
+        Scene sceneConfig = new Scene(rootConfig);
+
+        //  scene.getStylesheets().add("/styles/Styles.css");
         primaryStage.setTitle("Enter Init Parameters");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(sceneConfig);
         primaryStage.show();
-        
-        Button btnStart = (Button)scene.lookup("btnStart");
-        System.out.println(btnStart);
+
+        Button btnStart = (Button) loader.getNamespace().get("btnStart");
+        /* System.out.println(btnStart);
         System.out.println(scene.lookup("ap"));
-       // btnStart.setOnAction((e) -> {
-       //     System.out.println("hello");
-       // });
+        System.out.println("root >> " + loader.getNamespace().get("ap"));*/
+        btnStart.setOnAction((e) -> {
+            try {
+
+                CheckBox chkElitist = (CheckBox) loader.getNamespace().get("chkElitist");
+                ComboBox<String> cmbCrossOver = (ComboBox<String>) loader.getNamespace().get("cmbCrossOver");
+                TextField txtPopulationSize = (TextField) loader.getNamespace().get("txtPopulationSize");
+                TextField txtNoOfRounds = (TextField) loader.getNamespace().get("txtNoOfRounds");
+                TextField txtSpeed = (TextField) loader.getNamespace().get("txtSpeed");
+                TextField txtMutationPercentage = (TextField) loader.getNamespace().get("txtMutationPercentage");
+
+                CROSSOVER_RATE = 0.5d;
+                CHROMOSOME_LENGTH = 500;
+                POPULATION_SIZE = 12;
+                MUTATION_PERCENTAGE = 10;
+                NO_OF_ROUNDS = Integer.parseInt(txtNoOfRounds.getText());
+                SLEEP
+                        = drawApp(primaryStage);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         /*Canvas canvas = new Canvas(1024, 768);
 
         gc = canvas.getGraphicsContext2D();
@@ -160,6 +192,74 @@ public class GAtest1 extends Application {
             inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
         }
         start();*/
+    }
+
+    private void drawApp(Stage primaryStage) throws FileNotFoundException {
+        System.out.println("hello");
+        Canvas canvas = new Canvas(1024, 768);
+
+        gc = canvas.getGraphicsContext2D();
+        File imageFile = new File("robot3.png");
+        File appleFile = new File("apple.png");
+        File treeFile = new File("tree1.png");
+        File stoneFile = new File("Coal-rock.png");
+        File factoryFile = new File("center.png");
+        File tileFile = new File("tile1.png");
+
+        appleImage = new Image(new FileInputStream(appleFile));
+        treeImage = new Image(new FileInputStream(treeFile));
+        stoneImage = new Image(new FileInputStream(stoneFile));
+        factoryImage = new Image(new FileInputStream(factoryFile));
+        tileImage = new Image(new FileInputStream(tileFile));
+
+        for (int i = 0; i < 10; i++) {
+            if (i > 3 && i < 6) {
+                continue;
+            }
+            blocks.add(new Block(50 + 50 * (i + 1), 250));
+
+        }
+        for (int i = 0; i < 10; i++) {
+            if (i < 2 || i > 6) {
+                continue;
+            }
+            blocks.add(new Block(50 + 50 * (i + 1), 400));
+
+        }
+
+        for (int i = 0; i < 14; i++) {
+            if (i > 3 && i < 6) {
+                continue;
+            }
+            blocks.add(new Block(300 + 50 * (i + 1), 400));
+
+        }
+
+        for (int i = 0; i < 7; i++) {
+            if (i > 1 && i < 4) {
+                continue;
+            }
+            blocks.add(new Block(700, 400 + 50 * (i + 1)));
+
+        }
+
+        StackPane root = new StackPane();
+        root.getChildren().add(canvas);
+
+        Scene scene = new Scene(root);
+
+        primaryStage.setTitle("Hello World!");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        System.out.println();
+        // draw();
+        craftImage = new Image(new FileInputStream(imageFile));
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            //genes.add(;
+            inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
+        }
+        start();
     }
 
     private void start() {

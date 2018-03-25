@@ -55,6 +55,8 @@ public class FrmStartController implements Initializable {
                 "2 Point",
                 "Edge"
         ));
+        
+        cmbCrossOver.getSelectionModel().select(1);
     }    
 
     @FXML

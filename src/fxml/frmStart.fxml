@@ -4,11 +4,10 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="312.0" prefWidth="334.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.FrmStartController">
    <children>
       <Button fx:id="btnStart" layoutX="229.0" layoutY="244.0" mnemonicParsing="false" onAction="#btnStartOnClick" prefHeight="25.0" prefWidth="78.0" text="Start" />
-      <CheckBox fx:id="chkElitist" layoutX="159.0" layoutY="124.0" mnemonicParsing="false" />
+      <CheckBox fx:id="chkElitist" layoutX="159.0" layoutY="124.0" mnemonicParsing="false" selected="true" />
       <ComboBox fx:id="cmbCrossOver" layoutX="158.0" layoutY="57.0" prefWidth="150.0" />
       <TextField fx:id="txtPopulationSize" layoutX="158.0" layoutY="24.0" />
       <Label layoutX="26.0" layoutY="28.0" text="Population Size:" />
