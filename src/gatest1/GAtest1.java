@@ -42,13 +42,14 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
  * @author ravindu
  */
 public class GAtest1 extends Application {
-
+    
     double CROSSOVER_RATE = 0.5d;
     int CHROMOSOME_LENGTH = 500;
     int POPULATION_SIZE = 12;
@@ -60,17 +61,17 @@ public class GAtest1 extends Application {
     final int INIT_X = 100;
     final int INIT_Y = 700;
     int SLEEP = 10;
-
+    
     Image craftImage;
-
+    
     GraphicsContext gc;
-
+    
     Image appleImage;
     Image treeImage;
     Image stoneImage;
     Image factoryImage;
     Image tileImage;
-
+    
     double currentX = 200;
     double currentY = 400;
     double movementDelta = 20;
@@ -78,40 +79,46 @@ public class GAtest1 extends Application {
     boolean end = false;
     int round = 0;
     List<int[]> genes = new ArrayList<int[]>();
-
+    
     List<Individual> inidividuals = new ArrayList<>();
     List<Block> blocks = new ArrayList<>();
     Individual solution;
     final Goal goal = new Goal(330, 130);
     final Goal endGoal = new Goal(800, 550);
-
+    
     List<Thread> movementThreads = new ArrayList<>();
-
+    
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Screen screen3 = Screen.getScreens().get(1);
+        Screen screen3 = Screen.getScreens().get(0);
         Rectangle2D bounds = screen3.getBounds();
-
+        
         primaryStage.setX(bounds.getMinX() + 100);
         primaryStage.setY(bounds.getMinY() + 100);
-
+        
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/frmStart.fxml"));
         Parent rootConfig = loader.load();
-
+        
         Scene sceneConfig = new Scene(rootConfig);
-
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            
+            @Override
+            public void handle(WindowEvent event) {
+                System.exit(0);
+            }
+        });
         //  scene.getStylesheets().add("/styles/Styles.css");
         primaryStage.setTitle("Enter Init Parameters");
         primaryStage.setScene(sceneConfig);
         primaryStage.show();
-
+        
         Button btnStart = (Button) loader.getNamespace().get("btnStart");
         /* System.out.println(btnStart);
-        System.out.println(scene.lookup("ap"));
-        System.out.println("root >> " + loader.getNamespace().get("ap"));*/
+         System.out.println(scene.lookup("ap"));
+         System.out.println("root >> " + loader.getNamespace().get("ap"));*/
         btnStart.setOnAction((e) -> {
             try {
-
+                
                 CheckBox chkElitist = (CheckBox) loader.getNamespace().get("chkElitist");
                 ComboBox<String> cmbCrossOver = (ComboBox<String>) loader.getNamespace().get("cmbCrossOver");
                 TextField txtPopulationSize = (TextField) loader.getNamespace().get("txtPopulationSize");
@@ -134,74 +141,74 @@ public class GAtest1 extends Application {
         });
         /*Canvas canvas = new Canvas(1024, 768);
 
-        gc = canvas.getGraphicsContext2D();
-        File imageFile = new File("robot3.png");
-        File appleFile = new File("apple.png");
-        File treeFile = new File("tree1.png");
-        File stoneFile = new File("Coal-rock.png");
-        File factoryFile = new File("center.png");
-        File tileFile = new File("tile1.png");
+         gc = canvas.getGraphicsContext2D();
+         File imageFile = new File("robot3.png");
+         File appleFile = new File("apple.png");
+         File treeFile = new File("tree1.png");
+         File stoneFile = new File("Coal-rock.png");
+         File factoryFile = new File("center.png");
+         File tileFile = new File("tile1.png");
 
-        appleImage = new Image(new FileInputStream(appleFile));
-        treeImage = new Image(new FileInputStream(treeFile));
-        stoneImage = new Image(new FileInputStream(stoneFile));
-        factoryImage = new Image(new FileInputStream(factoryFile));
-        tileImage = new Image(new FileInputStream(tileFile));
+         appleImage = new Image(new FileInputStream(appleFile));
+         treeImage = new Image(new FileInputStream(treeFile));
+         stoneImage = new Image(new FileInputStream(stoneFile));
+         factoryImage = new Image(new FileInputStream(factoryFile));
+         tileImage = new Image(new FileInputStream(tileFile));
 
-        for (int i = 0; i < 10; i++) {
-            if (i > 3 && i < 6) {
-                continue;
-            }
-            blocks.add(new Block(50 + 50 * (i + 1), 250));
+         for (int i = 0; i < 10; i++) {
+         if (i > 3 && i < 6) {
+         continue;
+         }
+         blocks.add(new Block(50 + 50 * (i + 1), 250));
 
-        }
-        for (int i = 0; i < 10; i++) {
-            if (i < 2 || i > 6) {
-                continue;
-            }
-            blocks.add(new Block(50 + 50 * (i + 1), 400));
+         }
+         for (int i = 0; i < 10; i++) {
+         if (i < 2 || i > 6) {
+         continue;
+         }
+         blocks.add(new Block(50 + 50 * (i + 1), 400));
 
-        }
+         }
 
-        for (int i = 0; i < 14; i++) {
-            if (i > 3 && i < 6) {
-                continue;
-            }
-            blocks.add(new Block(300 + 50 * (i + 1), 400));
+         for (int i = 0; i < 14; i++) {
+         if (i > 3 && i < 6) {
+         continue;
+         }
+         blocks.add(new Block(300 + 50 * (i + 1), 400));
 
-        }
+         }
         
-        for (int i = 0; i < 7; i++) {
-             if (i > 1 && i < 4) {
-                continue;
-            }
-            blocks.add(new Block(700, 400 + 50 * (i + 1)));
+         for (int i = 0; i < 7; i++) {
+         if (i > 1 && i < 4) {
+         continue;
+         }
+         blocks.add(new Block(700, 400 + 50 * (i + 1)));
 
-        }
+         }
 
-        StackPane root = new StackPane();
-        root.getChildren().add(canvas);
+         StackPane root = new StackPane();
+         root.getChildren().add(canvas);
 
-        Scene scene = new Scene(root);
+         Scene scene = new Scene(root);
 
-        primaryStage.setTitle("Hello World!");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+         primaryStage.setTitle("Hello World!");
+         primaryStage.setScene(scene);
+         primaryStage.show();
 
-        System.out.println();
-        // draw();
-        craftImage = new Image(new FileInputStream(imageFile));
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            //genes.add(;
-            inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
-        }
-        start();*/
+         System.out.println();
+         // draw();
+         craftImage = new Image(new FileInputStream(imageFile));
+         for (int i = 0; i < POPULATION_SIZE; i++) {
+         //genes.add(;
+         inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
+         }
+         start();*/
     }
-
+    
     private void drawApp(Stage primaryStage) throws FileNotFoundException {
         System.out.println("hello");
         Canvas canvas = new Canvas(1024, 768);
-
+        
         gc = canvas.getGraphicsContext2D();
         File imageFile = new File("robot3.png");
         File appleFile = new File("apple.png");
@@ -209,53 +216,53 @@ public class GAtest1 extends Application {
         File stoneFile = new File("Coal-rock.png");
         File factoryFile = new File("center.png");
         File tileFile = new File("tile1.png");
-
+        
         appleImage = new Image(new FileInputStream(appleFile));
         treeImage = new Image(new FileInputStream(treeFile));
         stoneImage = new Image(new FileInputStream(stoneFile));
         factoryImage = new Image(new FileInputStream(factoryFile));
         tileImage = new Image(new FileInputStream(tileFile));
-
+        
         for (int i = 0; i < 10; i++) {
             if (i > 3 && i < 6) {
                 continue;
             }
             blocks.add(new Block(50 + 50 * (i + 1), 250));
-
+            
         }
         for (int i = 0; i < 10; i++) {
             if (i < 2 || i > 6) {
                 continue;
             }
             blocks.add(new Block(50 + 50 * (i + 1), 400));
-
+            
         }
-
+        
         for (int i = 0; i < 14; i++) {
             if (i > 3 && i < 6) {
                 continue;
             }
             blocks.add(new Block(300 + 50 * (i + 1), 400));
-
+            
         }
-
+        
         for (int i = 0; i < 7; i++) {
             if (i > 1 && i < 4) {
                 continue;
             }
             blocks.add(new Block(700, 400 + 50 * (i + 1)));
-
+            
         }
-
+        
         StackPane root = new StackPane();
         root.getChildren().add(canvas);
-
+        
         Scene scene = new Scene(root);
-
+        
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
         primaryStage.show();
-
+        
         System.out.println();
         // draw();
         craftImage = new Image(new FileInputStream(imageFile));
@@ -265,7 +272,7 @@ public class GAtest1 extends Application {
         }
         start();
     }
-
+    
     private void start() {
         for (int i = 0; i < this.inidividuals.size(); i++) {
             inidividuals.get(i).x = INIT_X;
@@ -287,7 +294,7 @@ public class GAtest1 extends Application {
             }).start();
         }
     }
-
+    
     private int[] getRandomlyInitializedChromosome() {
         int[] chromosome = new int[CHROMOSOME_LENGTH];
         Random random = new Random();
@@ -298,7 +305,7 @@ public class GAtest1 extends Application {
         //System.out.println("");
         return chromosome;
     }
-
+    
     private void move(Individual individual) {
         int[] gene = individual.genes;
         if (solution != null && individual != solution) {
@@ -359,7 +366,7 @@ public class GAtest1 extends Application {
                             } else {
                                 return;
                             }
-
+                            
                         }
                         break;
                 }
@@ -372,7 +379,7 @@ public class GAtest1 extends Application {
                     Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-
+            
             synchronized (goal) {
                 completion++;
                 //  System.out.println("completion" + completion);
@@ -383,16 +390,16 @@ public class GAtest1 extends Application {
         });
         t.start();
     }
-
+    
     private void draw(Individual ind) {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-
+        
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
                 gc.drawImage(tileImage, 256 * (j), 256 * i);
             }
         }
-
+        
         for (int i = 0; i < 5; i++) {
             gc.drawImage(treeImage, 100 * (i + 1), 80, 100, 100);
         }
@@ -407,11 +414,11 @@ public class GAtest1 extends Application {
         for (Block block : blocks) {
             gc.drawImage(stoneImage, block.x, block.y, block.w, block.h);
         }
-
+        
         gc.drawImage(appleImage, goal.x, goal.y, 20, 20);
         gc.drawImage(factoryImage, endGoal.x, endGoal.y, 160, 100);
         if (solution == null) {
-
+            
             for (Individual inidividual : inidividuals) {
                 gc.drawImage(craftImage, inidividual.x, inidividual.y, inidividual.w, inidividual.h);
             }
@@ -421,7 +428,7 @@ public class GAtest1 extends Application {
             double consoleY = 0;
             double consoleXText = consoleX + 10;
             double consoleYText = consoleY + 50;
-
+            
             gc.setFill(Color.BLACK);
             gc.fillRect(consoleX, consoleY, 250, 300);
             gc.setStroke(Color.GREEN);
@@ -433,12 +440,12 @@ public class GAtest1 extends Application {
                 // gc.strokeText((i + 1) + " | " + new DecimalFormat("#.0000").format(inidividuals.get(i).fitness) + "  " + inidividuals.get(i).payload.size(), consoleXText, consoleYText + (20 * (i + 1)));
                 gc.strokeText(s, consoleXText, consoleYText + (20 * (i + 1)));
             }
-
+            
         } else {
             gc.drawImage(craftImage, ind.x, ind.y, 50, 50);
         }
     }
-
+    
     private void calculateFitness() {
         for (Individual inidividual : inidividuals) {
             if (inidividual.payload.size() == 0) {
@@ -453,7 +460,7 @@ public class GAtest1 extends Application {
         }
         crossOver();
     }
-
+    
     private void crossOver() {
         List<Individual> unSelectedParents = new ArrayList<>();
         List<Individual> newIndividuals = new ArrayList<>();
@@ -471,7 +478,7 @@ public class GAtest1 extends Application {
                 parent2Index = random.nextInt(unSelectedParents.size());
                 System.out.println("@@parent 2 index " + parent2Index);
             }
-
+            
             int parent3Index = random.nextInt(unSelectedParents.size());
             System.out.println("parent 3 index " + parent3Index);
             while (parent1Index == parent3Index
@@ -479,7 +486,7 @@ public class GAtest1 extends Application {
                 parent3Index = random.nextInt(unSelectedParents.size());
                 System.out.println("@p@arent 3 index " + parent3Index);
             }
-
+            
             int parent4Index = random.nextInt(unSelectedParents.size());
             System.out.println("parent 4 index " + parent4Index);
             while (parent1Index == parent4Index
@@ -488,18 +495,18 @@ public class GAtest1 extends Application {
                 parent4Index = random.nextInt(unSelectedParents.size());
                 System.out.println("@@parent 4 index " + parent4Index);
             }
-
+            
             Individual candidateParent1 = unSelectedParents.get(parent1Index);
             Individual candidateParent2 = unSelectedParents.get(parent2Index);
             Individual candidateParent3 = unSelectedParents.get(parent3Index);
             Individual candidateParent4 = unSelectedParents.get(parent4Index);
-
+            
             List<Individual> candidateList = new ArrayList<>();
             candidateList.add(candidateParent1);
             candidateList.add(candidateParent2);
             candidateList.add(candidateParent3);
             candidateList.add(candidateParent4);
-
+            
             Individual parent1 = null;
             Individual parent2 = null;
             for (Individual individual : candidateList) {
@@ -510,7 +517,7 @@ public class GAtest1 extends Application {
                 }
             }
             candidateList.remove(parent1);
-
+            
             for (Individual individual : candidateList) {
                 if (parent2 == null) {
                     parent2 = individual;
@@ -518,16 +525,16 @@ public class GAtest1 extends Application {
                     parent2 = individual;
                 }
             }
-
+            
             System.out.println("parent1 >> " + parent1);
             System.out.println("parent2 >> " + parent2);
-
+            
             List<Individual> removeList = new ArrayList<>();
             removeList.add(candidateParent1);
             removeList.add(candidateParent2);
             removeList.add(candidateParent3);
             removeList.add(candidateParent4);
-
+            
             unSelectedParents.removeAll(removeList);
             System.out.println("1");
             //2point cross over
@@ -606,7 +613,7 @@ public class GAtest1 extends Application {
         inidividuals = newPopulation;
         mutate(mostFitted);
     }
-
+    
     private void mutate(Individual mostFitted) {
         int mutationCount = CHROMOSOME_LENGTH * MUTATION_PERCENTAGE / 100;
         Random random = new Random();
@@ -624,14 +631,14 @@ public class GAtest1 extends Application {
         }
         start();
     }
-
+    
     private void runSolution() {
     }
-
+    
     public static void main(String[] args) {
         launch(args);
     }
-
+    
     private boolean validateMove(Individual individual) {
         for (Block block : blocks) {
             if ((individual.x >= block.x && individual.x <= block.x + block.w && individual.y >= block.y && individual.y <= block.y + block.h)
