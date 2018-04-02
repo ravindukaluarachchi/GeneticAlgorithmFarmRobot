@@ -54,6 +54,8 @@ public class GAtest1 extends Application {
     int POPULATION_SIZE = 12;
     int MUTATION_PERCENTAGE = 10;
     int NO_OF_ROUNDS = 500;
+    String CROSS_OVER_METHOD = "";
+    boolean ELITIST = true;
 
     final int INIT_X = 100;
     final int INIT_Y = 700;
@@ -117,13 +119,15 @@ public class GAtest1 extends Application {
                 TextField txtSpeed = (TextField) loader.getNamespace().get("txtSpeed");
                 TextField txtMutationPercentage = (TextField) loader.getNamespace().get("txtMutationPercentage");
 
+                ELITIST = chkElitist.isSelected();
+                CROSS_OVER_METHOD = cmbCrossOver.getSelectionModel().getSelectedItem();
                 CROSSOVER_RATE = 0.5d;
                 CHROMOSOME_LENGTH = 500;
-                POPULATION_SIZE = 12;
-                MUTATION_PERCENTAGE = 10;
+                POPULATION_SIZE = Integer.parseInt(txtPopulationSize.getText());
+                MUTATION_PERCENTAGE = Integer.parseInt(txtMutationPercentage.getText());
                 NO_OF_ROUNDS = Integer.parseInt(txtNoOfRounds.getText());
-                SLEEP
-                        = drawApp(primaryStage);
+                SLEEP = Integer.parseInt(txtSpeed.getText());
+                drawApp(primaryStage);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -576,18 +580,21 @@ public class GAtest1 extends Application {
         List<Individual> newPopulation = new ArrayList<>();
         newPopulation.addAll(newIndividuals);
 
+        //preserve elitist
         Individual mostFitted = null;
-        for (Individual inidividual : inidividuals) {
-            if (mostFitted == null) {
-                mostFitted = inidividual;
+        if (ELITIST) {
+            
+            for (Individual inidividual : inidividuals) {
+                if (mostFitted == null) {
+                    mostFitted = inidividual;
+                }
+                if (mostFitted.fitness < inidividual.fitness) {
+                    mostFitted = inidividual;
+                }
             }
-            if (mostFitted.fitness < inidividual.fitness) {
-                mostFitted = inidividual;
-            }
+            newPopulation.add(mostFitted);
+            inidividuals.remove(mostFitted);
         }
-        newPopulation.add(mostFitted);
-        inidividuals.remove(mostFitted);
-
         int remainingPopulationSize = POPULATION_SIZE - newIndividuals.size();
         Collections.shuffle(inidividuals);
         for (int i = 0; i < remainingPopulationSize; i++) {
@@ -606,6 +613,7 @@ public class GAtest1 extends Application {
         Collections.shuffle(inidividuals);
         for (int j = 0; j < inidividuals.size() / 2; j++) {
             Individual individual = inidividuals.get(j);
+            //preserve elitist
             if (individual == mostFitted) {
                 continue;
             }
