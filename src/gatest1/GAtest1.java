@@ -49,7 +49,7 @@ import javafx.stage.WindowEvent;
  * @author ravindu
  */
 public class GAtest1 extends Application {
-    
+
     double CROSSOVER_RATE = 0.5d;
     int CHROMOSOME_LENGTH = 500;
     int POPULATION_SIZE = 12;
@@ -61,17 +61,17 @@ public class GAtest1 extends Application {
     final int INIT_X = 100;
     final int INIT_Y = 700;
     int SLEEP = 10;
-    
+
     Image craftImage;
-    
+
     GraphicsContext gc;
-    
+
     Image appleImage;
     Image treeImage;
     Image stoneImage;
     Image factoryImage;
     Image tileImage;
-    
+
     double currentX = 200;
     double currentY = 400;
     double movementDelta = 20;
@@ -79,29 +79,29 @@ public class GAtest1 extends Application {
     boolean end = false;
     int round = 0;
     List<int[]> genes = new ArrayList<int[]>();
-    
+
     List<Individual> inidividuals = new ArrayList<>();
     List<Block> blocks = new ArrayList<>();
     Individual solution;
     final Goal goal = new Goal(330, 130);
     final Goal endGoal = new Goal(800, 550);
-    
+
     List<Thread> movementThreads = new ArrayList<>();
-    
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         Screen screen3 = Screen.getScreens().get(0);
         Rectangle2D bounds = screen3.getBounds();
-        
+
         primaryStage.setX(bounds.getMinX() + 100);
         primaryStage.setY(bounds.getMinY() + 100);
-        
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/frmStart.fxml"));
         Parent rootConfig = loader.load();
-        
+
         Scene sceneConfig = new Scene(rootConfig);
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            
+
             @Override
             public void handle(WindowEvent event) {
                 System.exit(0);
@@ -111,14 +111,14 @@ public class GAtest1 extends Application {
         primaryStage.setTitle("Enter Init Parameters");
         primaryStage.setScene(sceneConfig);
         primaryStage.show();
-        
+
         Button btnStart = (Button) loader.getNamespace().get("btnStart");
         /* System.out.println(btnStart);
          System.out.println(scene.lookup("ap"));
          System.out.println("root >> " + loader.getNamespace().get("ap"));*/
         btnStart.setOnAction((e) -> {
             try {
-                
+
                 CheckBox chkElitist = (CheckBox) loader.getNamespace().get("chkElitist");
                 ComboBox<String> cmbCrossOver = (ComboBox<String>) loader.getNamespace().get("cmbCrossOver");
                 TextField txtPopulationSize = (TextField) loader.getNamespace().get("txtPopulationSize");
@@ -204,11 +204,11 @@ public class GAtest1 extends Application {
          }
          start();*/
     }
-    
+
     private void drawApp(Stage primaryStage) throws FileNotFoundException {
         System.out.println("hello");
         Canvas canvas = new Canvas(1024, 768);
-        
+
         gc = canvas.getGraphicsContext2D();
         File imageFile = new File("robot3.png");
         File appleFile = new File("apple.png");
@@ -216,53 +216,53 @@ public class GAtest1 extends Application {
         File stoneFile = new File("Coal-rock.png");
         File factoryFile = new File("center.png");
         File tileFile = new File("tile1.png");
-        
+
         appleImage = new Image(new FileInputStream(appleFile));
         treeImage = new Image(new FileInputStream(treeFile));
         stoneImage = new Image(new FileInputStream(stoneFile));
         factoryImage = new Image(new FileInputStream(factoryFile));
         tileImage = new Image(new FileInputStream(tileFile));
-        
+
         for (int i = 0; i < 10; i++) {
             if (i > 3 && i < 6) {
                 continue;
             }
             blocks.add(new Block(50 + 50 * (i + 1), 250));
-            
+
         }
         for (int i = 0; i < 10; i++) {
             if (i < 2 || i > 6) {
                 continue;
             }
             blocks.add(new Block(50 + 50 * (i + 1), 400));
-            
+
         }
-        
+
         for (int i = 0; i < 14; i++) {
             if (i > 3 && i < 6) {
                 continue;
             }
             blocks.add(new Block(300 + 50 * (i + 1), 400));
-            
+
         }
-        
+
         for (int i = 0; i < 7; i++) {
             if (i > 1 && i < 4) {
                 continue;
             }
             blocks.add(new Block(700, 400 + 50 * (i + 1)));
-            
+
         }
-        
+
         StackPane root = new StackPane();
         root.getChildren().add(canvas);
-        
+
         Scene scene = new Scene(root);
-        
+
         primaryStage.setTitle("Hello World!");
         primaryStage.setScene(scene);
         primaryStage.show();
-        
+
         System.out.println();
         // draw();
         craftImage = new Image(new FileInputStream(imageFile));
@@ -272,7 +272,7 @@ public class GAtest1 extends Application {
         }
         start();
     }
-    
+
     private void start() {
         for (int i = 0; i < this.inidividuals.size(); i++) {
             inidividuals.get(i).x = INIT_X;
@@ -294,7 +294,7 @@ public class GAtest1 extends Application {
             }).start();
         }
     }
-    
+
     private int[] getRandomlyInitializedChromosome() {
         int[] chromosome = new int[CHROMOSOME_LENGTH];
         Random random = new Random();
@@ -305,7 +305,7 @@ public class GAtest1 extends Application {
         //System.out.println("");
         return chromosome;
     }
-    
+
     private void move(Individual individual) {
         int[] gene = individual.genes;
         if (solution != null && individual != solution) {
@@ -366,7 +366,7 @@ public class GAtest1 extends Application {
                             } else {
                                 return;
                             }
-                            
+
                         }
                         break;
                 }
@@ -379,7 +379,7 @@ public class GAtest1 extends Application {
                     Logger.getLogger(GAtest1.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            
+
             synchronized (goal) {
                 completion++;
                 //  System.out.println("completion" + completion);
@@ -390,16 +390,16 @@ public class GAtest1 extends Application {
         });
         t.start();
     }
-    
+
     private void draw(Individual ind) {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-        
+
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
                 gc.drawImage(tileImage, 256 * (j), 256 * i);
             }
         }
-        
+
         for (int i = 0; i < 5; i++) {
             gc.drawImage(treeImage, 100 * (i + 1), 80, 100, 100);
         }
@@ -414,11 +414,11 @@ public class GAtest1 extends Application {
         for (Block block : blocks) {
             gc.drawImage(stoneImage, block.x, block.y, block.w, block.h);
         }
-        
+
         gc.drawImage(appleImage, goal.x, goal.y, 20, 20);
         gc.drawImage(factoryImage, endGoal.x, endGoal.y, 160, 100);
         if (solution == null) {
-            
+
             for (Individual inidividual : inidividuals) {
                 gc.drawImage(craftImage, inidividual.x, inidividual.y, inidividual.w, inidividual.h);
             }
@@ -428,7 +428,7 @@ public class GAtest1 extends Application {
             double consoleY = 0;
             double consoleXText = consoleX + 10;
             double consoleYText = consoleY + 50;
-            
+
             gc.setFill(Color.BLACK);
             gc.fillRect(consoleX, consoleY, 250, 300);
             gc.setStroke(Color.GREEN);
@@ -440,12 +440,12 @@ public class GAtest1 extends Application {
                 // gc.strokeText((i + 1) + " | " + new DecimalFormat("#.0000").format(inidividuals.get(i).fitness) + "  " + inidividuals.get(i).payload.size(), consoleXText, consoleYText + (20 * (i + 1)));
                 gc.strokeText(s, consoleXText, consoleYText + (20 * (i + 1)));
             }
-            
+
         } else {
             gc.drawImage(craftImage, ind.x, ind.y, 50, 50);
         }
     }
-    
+
     private void calculateFitness() {
         for (Individual inidividual : inidividuals) {
             if (inidividual.payload.size() == 0) {
@@ -460,137 +460,12 @@ public class GAtest1 extends Application {
         }
         crossOver();
     }
-    
-    private void crossOver() {
-        List<Individual> unSelectedParents = new ArrayList<>();
-        List<Individual> newIndividuals = new ArrayList<>();
-        unSelectedParents.addAll(inidividuals);
-        int crossOverAmount = new Double(inidividuals.size() * CROSSOVER_RATE).intValue() / 2;
-        Random random = new Random();
-        for (int i = 0; i < crossOverAmount; i++) {
-            System.out.println("un selected parents size : " + unSelectedParents.size());
-            System.out.println("cross over i : " + i + " start ---");
-            int parent1Index = random.nextInt(unSelectedParents.size());
-            System.out.println("parent 1 index " + parent1Index);
-            int parent2Index = random.nextInt(unSelectedParents.size());
-            System.out.println("parent 2 index " + parent2Index);
-            while (parent1Index == parent2Index) {
-                parent2Index = random.nextInt(unSelectedParents.size());
-                System.out.println("@@parent 2 index " + parent2Index);
-            }
-            
-            int parent3Index = random.nextInt(unSelectedParents.size());
-            System.out.println("parent 3 index " + parent3Index);
-            while (parent1Index == parent3Index
-                    || parent2Index == parent3Index) {
-                parent3Index = random.nextInt(unSelectedParents.size());
-                System.out.println("@p@arent 3 index " + parent3Index);
-            }
-            
-            int parent4Index = random.nextInt(unSelectedParents.size());
-            System.out.println("parent 4 index " + parent4Index);
-            while (parent1Index == parent4Index
-                    || parent2Index == parent4Index
-                    || parent3Index == parent4Index) {
-                parent4Index = random.nextInt(unSelectedParents.size());
-                System.out.println("@@parent 4 index " + parent4Index);
-            }
-            
-            Individual candidateParent1 = unSelectedParents.get(parent1Index);
-            Individual candidateParent2 = unSelectedParents.get(parent2Index);
-            Individual candidateParent3 = unSelectedParents.get(parent3Index);
-            Individual candidateParent4 = unSelectedParents.get(parent4Index);
-            
-            List<Individual> candidateList = new ArrayList<>();
-            candidateList.add(candidateParent1);
-            candidateList.add(candidateParent2);
-            candidateList.add(candidateParent3);
-            candidateList.add(candidateParent4);
-            
-            Individual parent1 = null;
-            Individual parent2 = null;
-            for (Individual individual : candidateList) {
-                if (parent1 == null) {
-                    parent1 = individual;
-                } else if (parent1.fitness < individual.fitness) {
-                    parent1 = individual;
-                }
-            }
-            candidateList.remove(parent1);
-            
-            for (Individual individual : candidateList) {
-                if (parent2 == null) {
-                    parent2 = individual;
-                } else if (parent2.fitness < individual.fitness) {
-                    parent2 = individual;
-                }
-            }
-            
-            System.out.println("parent1 >> " + parent1);
-            System.out.println("parent2 >> " + parent2);
-            
-            List<Individual> removeList = new ArrayList<>();
-            removeList.add(candidateParent1);
-            removeList.add(candidateParent2);
-            removeList.add(candidateParent3);
-            removeList.add(candidateParent4);
-            
-            unSelectedParents.removeAll(removeList);
-            System.out.println("1");
-            //2point cross over
-            int point1 = random.nextInt(CHROMOSOME_LENGTH - 1);
-            int point2;
-            do {
-                point2 = random.nextInt(CHROMOSOME_LENGTH);
-                System.out.println("2 >> " + point2 + " >= " + point1);
-            } while (point2 < point1);
-            System.out.println("3");
-            //child1
-            int[] newChromosome = new int[CHROMOSOME_LENGTH];
-            for (int j = 0; j < point1; j++) {
-                newChromosome[j] = parent1.genes[j];
-            }
-            System.out.println("4");
-            for (int j = point1; j < point2; j++) {
-                newChromosome[j] = parent2.genes[j];
-            }
-            System.out.println("5");
-            for (int j = point2; j < newChromosome.length; j++) {
-                newChromosome[j] = parent1.genes[j];
-            }
-            System.out.println("6");
-            System.out.println("7");
-            Individual child1 = new Individual(0, 0, newChromosome);
-            newIndividuals.add(child1);
-            //child2
-            newChromosome = new int[CHROMOSOME_LENGTH];
-            for (int j = 0; j < point1; j++) {
-                newChromosome[j] = parent2.genes[j];
-            }
-            System.out.println("8");
-            for (int j = point1; j < point2; j++) {
-                newChromosome[j] = parent1.genes[j];
-            }
-            System.out.println("9");
-            for (int j = point2; j < newChromosome.length; j++) {
-                newChromosome[j] = parent2.genes[j];
-            }
-            System.out.println("10");
-            Individual child2 = new Individual(0, 0, newChromosome);
-            newIndividuals.add(child2);
-            System.out.println("cross over i : " + i + " end ---");
-        }
-        System.out.println("new individual size " + newIndividuals.size());
-        for (Individual newIndividual : newIndividuals) {
-            System.out.println(newIndividual);
-        }
-        List<Individual> newPopulation = new ArrayList<>();
-        newPopulation.addAll(newIndividuals);
 
-        //preserve elitist
+    private void crossOver() {
+        //preserve elitist        
         Individual mostFitted = null;
         if (ELITIST) {
-            
+
             for (Individual inidividual : inidividuals) {
                 if (mostFitted == null) {
                     mostFitted = inidividual;
@@ -599,21 +474,29 @@ public class GAtest1 extends Application {
                     mostFitted = inidividual;
                 }
             }
-            newPopulation.add(mostFitted);
-            inidividuals.remove(mostFitted);
+
+            inidividuals.remove(mostFitted);            
         }
-        int remainingPopulationSize = POPULATION_SIZE - newIndividuals.size();
-        Collections.shuffle(inidividuals);
-        for (int i = 0; i < remainingPopulationSize; i++) {
-            inidividuals.get(i).x = 0;
-            inidividuals.get(i).y = 0;
-            //inidividuals.get(i).fitness = 0;
-            newPopulation.add(inidividuals.get(i));
+        
+        
+        CrossOverMethod com = new CrossOverMethod(inidividuals,inidividuals.size(), CHROMOSOME_LENGTH, CROSSOVER_RATE, ELITIST);
+        switch (CROSS_OVER_METHOD) {
+            case "2 Point":
+                inidividuals = com.twoPointCrossOver();
+                break;
+            case "1 Point":
+                break;
+            case "Edge":
+                break;
         }
-        inidividuals = newPopulation;
+        
+        //add elitist to the new population
+        if (ELITIST) {
+            inidividuals.add(mostFitted);
+        }
         mutate(mostFitted);
     }
-    
+
     private void mutate(Individual mostFitted) {
         int mutationCount = CHROMOSOME_LENGTH * MUTATION_PERCENTAGE / 100;
         Random random = new Random();
@@ -631,14 +514,14 @@ public class GAtest1 extends Application {
         }
         start();
     }
-    
+
     private void runSolution() {
     }
-    
+
     public static void main(String[] args) {
         launch(args);
     }
-    
+
     private boolean validateMove(Individual individual) {
         for (Block block : blocks) {
             if ((individual.x >= block.x && individual.x <= block.x + block.w && individual.y >= block.y && individual.y <= block.y + block.h)
