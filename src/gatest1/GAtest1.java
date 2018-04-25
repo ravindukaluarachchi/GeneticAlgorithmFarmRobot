@@ -80,7 +80,7 @@ public class GAtest1 extends Application {
     int round = 0;
     List<int[]> genes = new ArrayList<int[]>();
 
-    List<Individual> inidividuals = new ArrayList<>();
+    List<Individual> individuals = new ArrayList<>();
     List<Block> blocks = new ArrayList<>();
     Individual solution;
     final Goal goal = new Goal(330, 130);
@@ -200,7 +200,7 @@ public class GAtest1 extends Application {
          craftImage = new Image(new FileInputStream(imageFile));
          for (int i = 0; i < POPULATION_SIZE; i++) {
          //genes.add(;
-         inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
+         individuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
          }
          start();*/
     }
@@ -268,16 +268,16 @@ public class GAtest1 extends Application {
         craftImage = new Image(new FileInputStream(imageFile));
         for (int i = 0; i < POPULATION_SIZE; i++) {
             //genes.add(;
-            inidividuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
+            individuals.add(new Individual(i * INIT_X, INIT_Y, getRandomlyInitializedChromosome()));
         }
         start();
     }
 
     private void start() {
-        for (int i = 0; i < this.inidividuals.size(); i++) {
-            inidividuals.get(i).x = INIT_X;
-            inidividuals.get(i).y = INIT_Y;
-            inidividuals.get(i).payload.clear();
+        for (int i = 0; i < this.individuals.size(); i++) {
+            individuals.get(i).x = INIT_X;
+            individuals.get(i).y = INIT_Y;
+            individuals.get(i).payload.clear();
         }
         completion = 0;
         round++;
@@ -285,10 +285,10 @@ public class GAtest1 extends Application {
             System.exit(0);
         }
         System.out.println(round + " ==========================");
-        for (Individual inidividual : inidividuals) {
+        for (Individual inidividual : individuals) {
             System.out.println(inidividual);
         }
-        for (Individual i : inidividuals) {
+        for (Individual i : individuals) {
             new Thread(() -> {
                 move(i);
             }).start();
@@ -383,7 +383,7 @@ public class GAtest1 extends Application {
             synchronized (goal) {
                 completion++;
                 //  System.out.println("completion" + completion);
-                if (completion / inidividuals.size() == 1) {
+                if (completion / individuals.size() == 1) {
                     calculateFitness();
                 }
             }
@@ -419,7 +419,7 @@ public class GAtest1 extends Application {
         gc.drawImage(factoryImage, endGoal.x, endGoal.y, 160, 100);
         if (solution == null) {
 
-            for (Individual inidividual : inidividuals) {
+            for (Individual inidividual : individuals) {
                 gc.drawImage(craftImage, inidividual.x, inidividual.y, inidividual.w, inidividual.h);
             }
 
@@ -433,11 +433,11 @@ public class GAtest1 extends Application {
             gc.fillRect(consoleX, consoleY, 250, 300);
             gc.setStroke(Color.GREEN);
             gc.strokeText("[Console] round : " + round, consoleXText, consoleYText);
-            for (int i = 0; i < inidividuals.size(); i++) {
+            for (int i = 0; i < individuals.size(); i++) {
                 //  System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" );
-                //System.out.println( inidividuals.get(i).fitness);
-                String s = String.format("%d | %.8f  %d", i + 1, inidividuals.get(i).fitness, inidividuals.get(i).payload.size());
-                // gc.strokeText((i + 1) + " | " + new DecimalFormat("#.0000").format(inidividuals.get(i).fitness) + "  " + inidividuals.get(i).payload.size(), consoleXText, consoleYText + (20 * (i + 1)));
+                //System.out.println( individuals.get(i).fitness);
+                String s = String.format("%d | %.8f  %d", i + 1, individuals.get(i).fitness, individuals.get(i).payload.size());
+                // gc.strokeText((i + 1) + " | " + new DecimalFormat("#.0000").format(individuals.get(i).fitness) + "  " + individuals.get(i).payload.size(), consoleXText, consoleYText + (20 * (i + 1)));
                 gc.strokeText(s, consoleXText, consoleYText + (20 * (i + 1)));
             }
 
@@ -447,7 +447,7 @@ public class GAtest1 extends Application {
     }
 
     private void calculateFitness() {
-        for (Individual inidividual : inidividuals) {
+        for (Individual inidividual : individuals) {
             if (inidividual.payload.size() == 0) {
                 inidividual.fitness = Math.sqrt(Math.pow(goal.x - inidividual.x, 2) + Math.pow(goal.y - inidividual.y, 2));
                 inidividual.fitness = 1 / inidividual.fitness;
@@ -466,7 +466,7 @@ public class GAtest1 extends Application {
         Individual mostFitted = null;
         if (ELITIST) {
 
-            for (Individual inidividual : inidividuals) {
+            for (Individual inidividual : individuals) {
                 if (mostFitted == null) {
                     mostFitted = inidividual;
                 }
@@ -475,14 +475,14 @@ public class GAtest1 extends Application {
                 }
             }
 
-            inidividuals.remove(mostFitted);            
+            //individuals.remove(mostFitted);            
         }
         
         
-        CrossOverMethod com = new CrossOverMethod(inidividuals,inidividuals.size(), CHROMOSOME_LENGTH, CROSSOVER_RATE, ELITIST);
+        CrossOverMethod com = new CrossOverMethod(individuals,individuals.size(), CHROMOSOME_LENGTH, CROSSOVER_RATE, ELITIST);
         switch (CROSS_OVER_METHOD) {
             case "2 Point":
-                inidividuals = com.twoPointCrossOver();
+                individuals = com.twoPointCrossOver();
                 break;
             case "1 Point":
                 break;
@@ -491,8 +491,19 @@ public class GAtest1 extends Application {
         }
         
         //add elitist to the new population
-        if (ELITIST) {
-            inidividuals.add(mostFitted);
+        if (ELITIST && !individuals.contains(mostFitted)) {
+            //remove the least fittest individual and add back the most fittest individual
+            Individual leastFitted = null;
+            for (Individual inidividual : individuals) {
+                if (leastFitted == null) {
+                    leastFitted = inidividual;
+                }
+                if (leastFitted.fitness > inidividual.fitness) {
+                    leastFitted = inidividual;
+                }
+            }
+            individuals.remove(leastFitted);
+            individuals.add(mostFitted);
         }
         mutate(mostFitted);
     }
@@ -500,9 +511,9 @@ public class GAtest1 extends Application {
     private void mutate(Individual mostFitted) {
         int mutationCount = CHROMOSOME_LENGTH * MUTATION_PERCENTAGE / 100;
         Random random = new Random();
-        Collections.shuffle(inidividuals);
-        for (int j = 0; j < inidividuals.size() / 2; j++) {
-            Individual individual = inidividuals.get(j);
+        Collections.shuffle(individuals);
+        for (int j = 0; j < individuals.size() / 2; j++) {
+            Individual individual = individuals.get(j);
             //preserve elitist
             if (individual == mostFitted) {
                 continue;
