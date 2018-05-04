@@ -477,9 +477,8 @@ public class GAtest1 extends Application {
 
             //individuals.remove(mostFitted);            
         }
-        
-        
-        CrossOverMethod com = new CrossOverMethod(individuals,individuals.size(), CHROMOSOME_LENGTH, CROSSOVER_RATE, ELITIST);
+
+        CrossOverMethod com = new CrossOverMethod(individuals, individuals.size(), CHROMOSOME_LENGTH, CROSSOVER_RATE, ELITIST);
         switch (CROSS_OVER_METHOD) {
             case "2 Point":
                 individuals = com.twoPointCrossOver();
@@ -489,7 +488,7 @@ public class GAtest1 extends Application {
             case "Edge":
                 break;
         }
-        
+
         //add elitist to the new population
         if (ELITIST && !individuals.contains(mostFitted)) {
             //remove the least fittest individual and add back the most fittest individual
@@ -525,6 +524,120 @@ public class GAtest1 extends Application {
         }
         start();
     }
+
+    // ******************* EDITED BY VIJANI**********************************
+    private void swapMutation(Individual mostFitted) {
+        Random random = new Random();
+        Collections.shuffle(individuals);
+        for (int j = 0; j < individuals.size() / 2; j++) {
+            Individual individual = individuals.get(j);
+            //preserve elitist
+            if (individual == mostFitted) {
+                continue;
+            }
+            int index1 = random.nextInt(CHROMOSOME_LENGTH);
+            int index2 = random.nextInt(CHROMOSOME_LENGTH);
+            int temp = individual.genes[index1];
+            individual.genes[index1] = individual.genes[index2];
+            individual.genes[index2] = temp;
+        }
+        start();
+    }
+
+    private void insertMutation(Individual mostFitted) {
+        Random random = new Random();
+        Collections.shuffle(individuals);
+        for (int j = 0; j < individuals.size() / 2; j++) {
+            Individual individual = individuals.get(j);
+            //preserve elitist
+            if (individual == mostFitted) {
+                continue;
+            }
+            int index1 = random.nextInt(CHROMOSOME_LENGTH);
+            int index2 = random.nextInt(CHROMOSOME_LENGTH);
+
+            int temp = individual.genes[index2];
+
+            if (index1 > index2) {
+                int tmp = index1;
+                index1 = index2;
+                index2 = tmp;
+            } else if (index1 == index2) {
+                break;
+            }
+
+            for (int i = (index1 + 1); i < index2; i++) {
+                individual.genes[i + 1] = individual.genes[i];
+            }
+            individual.genes[index1 + 1] = temp;
+        }
+        start();
+    }
+
+    private void inversionMutation(Individual mostFitted) {
+        Random random = new Random();
+        Collections.shuffle(individuals);
+        for (int j = 0; j < individuals.size() / 2; j++) {
+            Individual individual = individuals.get(j);
+            //preserve elitist
+            if (individual == mostFitted) {
+                continue;
+            }
+            int index1 = random.nextInt(CHROMOSOME_LENGTH);
+            int index2 = random.nextInt(CHROMOSOME_LENGTH);
+            if (index1 > index2) {
+                int tmp = index1;
+                index1 = index2;
+                index2 = tmp;
+            } else if (index1 == index2) {
+                break;
+            }
+            while (index1 < index2) {
+                int temp = individual.genes[index1];
+                individual.genes[index1] = individual.genes[index2];
+                individual.genes[index2] = temp;
+                index1++;
+                index2--;
+            }
+
+        }
+        start();
+    }
+
+    private void scrambleMutation(Individual mostFitted) {
+        Random random = new Random();
+        Collections.shuffle(individuals);
+        for (int j = 0; j < individuals.size() / 2; j++) {
+            Individual individual = individuals.get(j);
+            //preserve elitist
+            if (individual == mostFitted) {
+                continue;
+            }
+            int index1 = random.nextInt(CHROMOSOME_LENGTH);
+            int index2 = random.nextInt(CHROMOSOME_LENGTH);
+            if (index1 > index2) {
+                int tmp = index1;
+                index1 = index2;
+                index2 = tmp;
+            } else if (index1 == index2) {
+                break;
+            }
+            
+            int[] genes = null;
+            int k = 0;
+            for(int i=index1; i<=index2; i++){
+                genes[k] = (individual.genes[i]);
+                k++;
+            }
+            List<int[]> subSet = Arrays.asList(genes);
+            Collections.shuffle(subSet);
+            
+            // replace the subset of individual with shuffled genes ?????
+            
+        }
+        start();
+    }
+//*****************************END of Editing by Vijani**********************************************
 
     private void runSolution() {
     }
