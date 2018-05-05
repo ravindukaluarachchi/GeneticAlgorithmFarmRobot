@@ -63,7 +63,7 @@ public class FrmStartController implements Initializable {
                 "Swap",
                 "Insert",
                 "Scramble",
-                "Inversion"
+                "Inversion" 
         ));
         
         cmbMutation.getSelectionModel().select(0);
