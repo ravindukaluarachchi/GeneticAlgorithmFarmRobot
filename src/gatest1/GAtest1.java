@@ -364,9 +364,11 @@ public class GAtest1 extends Application {
                                 System.out.println("Best individual ::: ");
                                 System.out.println(solution);
                                 System.out.println("::::::::::::::::::::::;;");
+                                System.exit(0);
                                 individual.x = INIT_X;
                                 individual.y = INIT_Y;
                                 move(individual);
+                                
                             } else {
                                 return;
                             }
@@ -514,6 +516,9 @@ public class GAtest1 extends Application {
         
         //************** added by Vijani************
         switch(MUTATION_TYPE){
+            case "Binary":
+                mutate(mostFitted);
+                break;
             case "Swap":
                 swapMutation(mostFitted);
                 break;

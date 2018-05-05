@@ -60,6 +60,7 @@ public class FrmStartController implements Initializable {
         cmbCrossOver.getSelectionModel().select(0);
         
         cmbMutation.setItems(FXCollections.observableArrayList(
+                "Binary",
                 "Swap",
                 "Insert",
                 "Scramble",
@@ -71,6 +72,10 @@ public class FrmStartController implements Initializable {
 
     @FXML
     private void btnStartOnClick(ActionEvent event) {
+    }
+    
+    @FXML
+    private void btnExitOnClick(ActionEvent event) {
     }
     
 }
