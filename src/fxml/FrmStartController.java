@@ -53,7 +53,7 @@ public class FrmStartController implements Initializable {
         cmbCrossOver.setItems(FXCollections.observableArrayList(
                 "1 Point",
                 "2 Point",
-                "Edge"
+                "pmx"
         ));
         
         cmbCrossOver.getSelectionModel().select(1);

@@ -347,7 +347,7 @@ public class GAtest1 extends Application {
                         break;
                     case 5:
                         if (individual.pick(new Goal[]{goal})) {
-                            System.out.println("************************************found goal*******************");
+                            System.out.println("************************************found apple*******************");
                             //  System.exit(0);
                         }
                         break;
@@ -485,8 +485,10 @@ public class GAtest1 extends Application {
                 individuals = com.twoPointCrossOver();
                 break;
             case "1 Point":
+                individuals = com.onePointCrossOver();
                 break;
-            case "Edge":
+            case "pmx":
+                individuals = com.pmxCrossOver();
                 break;
         }
         
