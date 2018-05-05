@@ -39,7 +39,8 @@ public class FrmStartController implements Initializable {
     private TextField txtSpeed;
     @FXML
     private TextField txtMutationPercentage;
-
+    @FXML
+    private ComboBox<String> cmbMutation;
     /**
      * Initializes the controller class.
      */
@@ -56,7 +57,16 @@ public class FrmStartController implements Initializable {
                 "pmx"
         ));
         
-        cmbCrossOver.getSelectionModel().select(1);
+        cmbCrossOver.getSelectionModel().select(0);
+        
+        cmbMutation.setItems(FXCollections.observableArrayList(
+                "Swap",
+                "Insert",
+                "Scramble",
+                "Inversion" 
+        ));
+        
+        cmbMutation.getSelectionModel().select(0);
     }    
 
     @FXML
