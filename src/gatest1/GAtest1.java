@@ -56,6 +56,7 @@ public class GAtest1 extends Application {
     int MUTATION_PERCENTAGE = 10;
     int NO_OF_ROUNDS = 500;
     String CROSS_OVER_METHOD = "";
+    String MUTATION_TYPE ="";
     boolean ELITIST = true;
 
     final int INIT_X = 100;
@@ -121,6 +122,8 @@ public class GAtest1 extends Application {
 
                 CheckBox chkElitist = (CheckBox) loader.getNamespace().get("chkElitist");
                 ComboBox<String> cmbCrossOver = (ComboBox<String>) loader.getNamespace().get("cmbCrossOver");
+                ComboBox<String> cmbMutation = (ComboBox<String>) loader.getNamespace().get("cmbMutation");
+               
                 TextField txtPopulationSize = (TextField) loader.getNamespace().get("txtPopulationSize");
                 TextField txtNoOfRounds = (TextField) loader.getNamespace().get("txtNoOfRounds");
                 TextField txtSpeed = (TextField) loader.getNamespace().get("txtSpeed");
@@ -128,6 +131,7 @@ public class GAtest1 extends Application {
 
                 ELITIST = chkElitist.isSelected();
                 CROSS_OVER_METHOD = cmbCrossOver.getSelectionModel().getSelectedItem();
+                MUTATION_TYPE = cmbMutation.getSelectionModel().getSelectedItem();
                 CROSSOVER_RATE = 0.5d;
                 CHROMOSOME_LENGTH = 500;
                 POPULATION_SIZE = Integer.parseInt(txtPopulationSize.getText());
@@ -488,6 +492,7 @@ public class GAtest1 extends Application {
             case "Edge":
                 break;
         }
+       
 
         //add elitist to the new population
         if (ELITIST && !individuals.contains(mostFitted)) {
@@ -504,7 +509,25 @@ public class GAtest1 extends Application {
             individuals.remove(leastFitted);
             individuals.add(mostFitted);
         }
-        mutate(mostFitted);
+        
+        //************** added by Vijani************
+        switch(MUTATION_TYPE){
+            case "Swap":
+                swapMutation(mostFitted);
+                break;
+            case "Insert":
+                insertMutation(mostFitted);
+                break;
+            case "Scramble":
+                scrambleMutation(mostFitted);
+                break;
+            case "Inversion":
+                inversionMutation(mostFitted);
+                break;
+        }
+       
+        //mutate(mostFitted);
+        //*************end ************
     }
 
     private void mutate(Individual mostFitted) {
